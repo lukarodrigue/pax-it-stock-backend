@@ -8,7 +8,9 @@
     "build": "tsc",
     "start": "node dist/server.js"
   },
-  "dependencies": {
-    "zod": "^4.5.2"
+  "devDependencies": {
+    "express": "^5.2.1",
+    "tsx": "^4.23.13",
+    "zod": "^4.5.4"
   }
 }
