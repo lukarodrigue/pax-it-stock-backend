@@ -1,16 +1,27 @@
 {
   "name": "pax-it-stock-backend",
+  "type": "module",
   "version": "1.0.0",
   "description": "Backend do sistema interno de gestão de estoque e ativos de TI do Grupo Pax Primavera",
   "main": "dist/server.js",
   "scripts": {
     "dev": "tsx watch src/server.ts",
     "build": "tsc",
-    "start": "node dist/server.js"
+    "start": "node dist/server.js",
+    "postinstall": "prisma skills sync || exit 0",
+    "contract:emit": "prisma contract emit"
   },
   "devDependencies": {
+    "@prisma/cli-engine": "^0.2.3",
+    "@types/node": "^26.4.0",
     "express": "^5.2.1",
+    "prisma": "^8.0.0-rc.10",
     "tsx": "^4.23.13",
     "zod": "^4.5.4"
+  },
+  "dependencies": {
+    "@prisma/client": "^7.10.0",
+    "@prisma/orm-postgres": "^8.0.0-rc.8",
+    "dotenv": "^17.4.2"
   }
 }
