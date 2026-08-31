@@ -1,8 +1,20 @@
-node_modules/
-dist/
-
 .env
 .env.*
 !.env.example
 
 .DS_Store
+
+node_modules/
+
+.agents/
+.claude/
+.cursor/
+.devin/
+
+
+src/prisma/contract.d.ts
+src/prisma/contract.json
+
+
+dist/
+build/
