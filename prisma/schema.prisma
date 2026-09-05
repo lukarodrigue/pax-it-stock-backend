@@ -1,0 +1,174 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum ProductType {
+  CONSUMABLE
+  ASSET
+}
+
+enum AssetStatus {
+  IN_STOCK
+  ASSIGNED
+  MAINTENANCE
+  RETIRED
+}
+
+enum EventType {
+  ASSIGN
+  RETURN
+  TO_MAINTENANCE
+  FROM_MAINTENANCE
+  RETIRE
+}
+
+enum MovementType {
+  IN
+  OUT
+}
+
+enum Department {
+  TI
+  FINANCEIRO
+  RH
+  COMERCIAL
+  OPERACIONAL
+  DIRETORIA
+}
+
+model User {
+  id        String   @id @default(cuid())
+  name      String
+  email     String   @unique
+  password  String
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  movements   StockMovement[]
+  assetEvents AssetEvent[]
+}
+
+model Employee {
+  id           String     @id @default(cuid())
+  name         String
+  registration String?    @unique
+  department   Department
+  role         String?
+  active       Boolean    @default(true)
+  createdAt    DateTime   @default(now())
+
+  assets      Asset[]
+  movements   StockMovement[]
+  assetEvents AssetEvent[]
+}
+
+model Category {
+  id       String    @id @default(cuid())
+  name     String    @unique
+  products Product[]
+}
+
+model Product {
+  id            String      @id @default(cuid())
+  name          String
+  brand         String?
+  model         String?
+  internalCode  String?     @unique
+  type          ProductType
+  minQuantity   Int?
+  idealQuantity Int?
+  notes         String?
+  active        Boolean     @default(true)
+  createdAt     DateTime    @default(now())
+
+  categoryId String
+  category   Category @relation(fields: [categoryId], references: [id])
+
+  stockItems StockItem[]
+  assets     Asset[]
+}
+
+model Location {
+  id   String @id @default(cuid())
+  name String @unique
+
+  stockItems StockItem[]
+  assets     Asset[]
+}
+
+model StockItem {
+  id       String @id @default(cuid())
+  quantity Int    @default(0)
+
+  productId  String
+  locationId String
+  product    Product  @relation(fields: [productId], references: [id])
+  location   Location @relation(fields: [locationId], references: [id])
+
+  movements StockMovement[]
+
+  @@unique([productId, locationId])
+}
+
+model StockMovement {
+  id         String       @id @default(cuid())
+  type       MovementType
+  quantity   Int
+  reason     String?
+  notes      String?
+  department Department?
+  createdAt  DateTime     @default(now())
+
+  stockItemId String
+  userId      String
+  employeeId  String?
+
+  stockItem StockItem @relation(fields: [stockItemId], references: [id])
+  user      User      @relation(fields: [userId], references: [id])
+  employee  Employee? @relation(fields: [employeeId], references: [id])
+
+  @@index([createdAt])
+}
+
+model Asset {
+  id           String      @id @default(cuid())
+  serialNumber String?     @unique
+  assetTag     String?     @unique
+  status       AssetStatus @default(IN_STOCK)
+  notes        String?
+  createdAt    DateTime    @default(now())
+
+  productId    String
+  locationId   String
+  assignedToId String?
+
+  product    Product   @relation(fields: [productId], references: [id])
+  location   Location  @relation(fields: [locationId], references: [id])
+  assignedTo Employee? @relation(fields: [assignedToId], references: [id])
+
+  events AssetEvent[]
+
+  @@index([status])
+}
+
+model AssetEvent {
+  id         String      @id @default(cuid())
+  type       EventType
+  department Department?
+  notes      String?
+  createdAt  DateTime    @default(now())
+
+  assetId    String
+  userId     String
+  employeeId String?
+
+  asset    Asset     @relation(fields: [assetId], references: [id])
+  user     User      @relation(fields: [userId], references: [id])
+  employee Employee? @relation(fields: [employeeId], references: [id])
+
+  @@index([assetId, createdAt])
+}
