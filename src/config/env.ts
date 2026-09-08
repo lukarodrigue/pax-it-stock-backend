@@ -4,7 +4,11 @@ import { z } from 'zod';
 const envSchema = z.object({
   DATABASE_URL: z.string().url(),
   JWT_SECRET: z.string().min(32, 'JWT_SECRET precisa ter ao menos 32 caracteres'),
-  JWT_EXPIRES_IN: z.string().default('8h'),
+  JWT_EXPIRES_IN: z
+  .string()
+  .regex(/^\d+[smhd]$/, 'Use formato como 8h, 30m, 7d')
+  .default('8h')
+  .transform((v) => v as `${number}${'s' | 'm' | 'h' | 'd'}`),
   PORT: z.coerce.number().default(3333),
 });
 
