@@ -2,13 +2,14 @@ import argon2 from 'argon2';
 import jwt from 'jsonwebtoken';
 import { userRepository } from '../repositories/user.repository';
 import { env } from '../config/env';
+import { ConflictError, UnauthorizedError } from '../utils/AppError.js';
 
 export const authService = {
   async register(data: { name: string; email: string; password: string }) {
     const existing = await userRepository.findByEmail(data.email);
 
     if (existing) {
-      throw new Error('E-mail já cadastrado');
+      throw new ConflictError('E-mail já cadastrado');
     }
 
     const passwordHash = await argon2.hash(data.password);
@@ -26,13 +27,13 @@ export const authService = {
     const user = await userRepository.findByEmail(data.email);
 
     if (!user || !user.active) {
-      throw new Error('Credenciais inválidas');
+      throw new UnauthorizedError('Credenciais inválidas');
     }
 
     const valid = await argon2.verify(user.password, data.password);
 
     if (!valid) {
-      throw new Error('Credenciais inválidas');
+      throw new UnauthorizedError('Credenciais inválidas');
     }
 
     const token = jwt.sign({ sub: user.id }, env.JWT_SECRET, {
