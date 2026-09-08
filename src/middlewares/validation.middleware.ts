@@ -10,7 +10,10 @@ export function validate(schema: ZodType) {
         success: false,
         message: "Dados inválidos",
         error: "VALIDATION_ERROR",
-        details: result.error.issues
+        details: result.error.issues.map((i) => ({
+          path: i.path,
+          message: i.message,
+        })),
       });
     }
 
